@@ -1,7 +1,8 @@
 *
 {
-    margin: 0;
+    margin: 1000px;
     padding: 0;
+    color: red;
 }
 
 html,
@@ -9,12 +10,4 @@ body
 {
     height: 100vh;
     font-family: 'Poppins';
-}
-
-.webgl
-{
-    position: fixed;
-    top: 0;
-    left: 0;
-    outline: none;
 }
