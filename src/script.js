@@ -3,6 +3,7 @@ import * as JZZ from 'jzz'
 import { Midi } from "@tonaljs/tonal"
 
 const VF = Vex.Flow;
+let heldNotes = [];
 
 function setupRenderer() {
     // Create an SVG renderer and attach it to the DIV element named "vf".
@@ -65,18 +66,38 @@ function noteNameToVfName(name) {
     }
 }
 
+function onNotePress(noteId) 
+{
+    heldNotes.push(noteNameToVfName(Midi.midiToNoteName(noteId)));
+
+    renderHeldNotes();
+}
+
+function onNoteRelease(noteId) 
+{
+    for(let i = 0; i < heldNotes.length; i++)
+    {
+        if(heldNotes[i] === noteNameToVfName(Midi.midiToNoteName(noteId)))
+        {
+            heldNotes.splice(i, 1);
+        }
+    }
+
+    renderHeldNotes();
+}
+
+function renderHeldNotes()
+{
+    let notes = new VF.StaveNote({ clef: "treble", keys: heldNotes, duration: "q", align_center: true });
+    render([notes]);
+}
+
 function onMidiSignal(msg)
 {
-    let currentNote = noteNameToVfName(Midi.midiToNoteName(msg[1]));
-
-    let notes = [];
-
-    if(currentNote[1] !== "/")
-        notes = [new VF.StaveNote({ clef: "treble", keys: [currentNote], duration: "q", align_center: true }).addAccidental(0, new VF.Accidental(currentNote[1]))];
-    else 
-        notes = [new VF.StaveNote({ clef: "treble", keys: [currentNote], duration: "q", align_center: true })];
-
-    render(notes);
+    if(msg[2] === 127)
+        onNotePress(msg[1]);
+    else
+        onNoteRelease(msg[1]);
 }
 
 function setupMidi() {
