@@ -85,10 +85,13 @@ function renderHeldNotes()
 
 function onMidiSignal(msg)
 {
-    if(msg[2] === 127)
-        onNotePress(msg[1]);
+    if(msg.data.length == 1)
+        return;
+
+    if(msg.data[0] === 144)
+        onNotePress(msg.data[1]);
     else
-        onNoteRelease(msg[1]);
+        onNoteRelease(msg.data[1]);
 }
 
 function setupMidi() {
@@ -99,4 +102,21 @@ function setupMidi() {
 
 const context = setupRenderer();
 renderGrandStaff(context);
-setupMidi();
+//setupMidi();
+
+navigator.requestMIDIAccess()
+    .then(onMIDISuccess, onMIDIFailure);
+
+function onMIDISuccess(midiAccess) {
+    for (var input of midiAccess.inputs.values())
+        input.onmidimessage = onMidiSignal;
+
+}
+
+function getMIDIMessage(midiMessage) {
+    console.log(midiMessage);
+}
+
+function onMIDIFailure() {
+    console.log('Could not access your MIDI devices.');
+}
