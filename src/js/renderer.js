@@ -1,6 +1,8 @@
 import Vex from 'vexflow';
 import * as JZZ from 'jzz'
 import { Midi } from "@tonaljs/tonal"
+import * as Util from './util'
+import "../style.css"
 
 const VF = Vex.Flow;
 let heldNotes = [];
@@ -11,9 +13,9 @@ function setupRenderer() {
     const renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
     
     // Configure the rendering context.
-    renderer.resize(500, 500);
+    renderer.resize(230, 230);
     const context = renderer.getContext();
-    context.setFont("Arial", 20, "").setBackgroundFillStyle("#eed");
+    context.setFont("Arial", 20, "").setBackgroundFillStyle("white");
 
     return context;
 }
@@ -24,7 +26,7 @@ function render(notes) {
 }
 
 function renderGrandStaff() {
-    context.rect(0, 0, 500, 500, { stroke: 'none', fill: 'white' });
+    context.rect(0, 0, 230, 230, { stroke: 'none', fill: 'white' });
 
     let topStaff = new Vex.Flow.Stave(20, 0, 200);
     topStaff.addClef('treble');
@@ -55,20 +57,9 @@ function renderNotes(staves, notes) {
     voice.draw(context, staves[0])
 }
 
-function noteNameToVfName(name) {
-    let characters = name.split("");
-
-    switch(characters.length) {
-        case 2:
-            return `${characters[0].toLowerCase()}/${characters[1]}`
-        case 3:
-            return `${characters[0].toLowerCase()}${characters[1]}/${characters[2]}`
-    }
-}
-
 function onNotePress(noteId) 
 {
-    heldNotes.push(noteNameToVfName(Midi.midiToNoteName(noteId)));
+    heldNotes.push(Util.noteNameToVfName(Midi.midiToNoteName(noteId)));
 
     renderHeldNotes();
 }
@@ -77,7 +68,7 @@ function onNoteRelease(noteId)
 {
     for(let i = 0; i < heldNotes.length; i++)
     {
-        if(heldNotes[i] === noteNameToVfName(Midi.midiToNoteName(noteId)))
+        if(heldNotes[i] === Util.noteNameToVfName(Midi.midiToNoteName(noteId)))
         {
             heldNotes.splice(i, 1);
         }
