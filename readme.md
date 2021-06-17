@@ -1,5 +1,5 @@
-# Three.js Starter
-Courtesy of Bruno Simon of https://threejs-journey.xyz/
+# Harmony
+A MIDI based piano sightreading and chord recognition training software
 
 ## Setup
 Download [Node.js](https://nodejs.org/en/download/).
