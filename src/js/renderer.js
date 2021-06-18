@@ -2,6 +2,7 @@ import Vex from 'vexflow';
 import * as JZZ from 'jzz'
 import { Midi } from "@tonaljs/tonal"
 import * as Util from './util'
+import * as Game from './engine/game'
 import "../style.css"
 
 const VF = Vex.Flow;
@@ -61,6 +62,7 @@ function onNotePress(noteId)
 {
     heldNotes.push(Util.noteNameToVfName(Midi.midiToNoteName(noteId)));
 
+    Game.validateQuestion(heldNotes)
     renderHeldNotes();
 }
 
@@ -74,6 +76,7 @@ function onNoteRelease(noteId)
         }
     }
 
+    Game.validateQuestion(heldNotes)
     renderHeldNotes();
 }
 
@@ -88,35 +91,25 @@ function onMidiSignal(msg)
     if(msg.data.length == 1)
         return;
 
-    if(msg.data[0] === 144)
+    if(msg.data[2] === 0) //For launchpad
+        onNoteRelease(msg.data[1]);
+    else if(msg.data[0] === 144)
         onNotePress(msg.data[1]);
     else
         onNoteRelease(msg.data[1]);
 }
 
-function setupMidi() {
-    let input = JZZ().openMidiIn();
-    let delay = JZZ.Widget({ _receive: function(msg) { onMidiSignal(msg) }});
-    input.connect(delay);    
-}
-
-const context = setupRenderer();
-renderGrandStaff(context);
-//setupMidi();
-
-navigator.requestMIDIAccess()
-    .then(onMIDISuccess, onMIDIFailure);
-
-function onMIDISuccess(midiAccess) {
+function setupMidi(midiAccess) {
     for (var input of midiAccess.inputs.values())
         input.onmidimessage = onMidiSignal;
-
-}
-
-function getMIDIMessage(midiMessage) {
-    console.log(midiMessage);
 }
 
 function onMIDIFailure() {
     console.log('Could not access your MIDI devices.');
 }
+
+const context = setupRenderer();
+renderGrandStaff(context);
+navigator.requestMIDIAccess().then(setupMidi, onMIDIFailure);
+
+Game.newQuestion();
